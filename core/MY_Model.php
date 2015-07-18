@@ -975,6 +975,7 @@ class MY_Model extends CI_Model
     		$options = array_merge($options, $value);
     	}
     	
+    	return $options;
     }
     
 }
