@@ -124,8 +124,20 @@ class MY_Model extends CI_Model
         $this->load->helper('inflector');
 
         $this->_fetch_table();
-
-        $this->_database = $this->db;
+       	
+        /**
+         * The CodeIgniter Model retrieves CI variables by overwriting the __get method.
+         * If a variable does not exist, it throws an exception because get_instance()->$variable_key fails.
+         * Therefore, if the default database is not loaded in $this->db, this code fails. Using 
+         * isset() does not work in this case either.
+         * 
+         * See: system/core/Mode.php function __get()
+         */
+        try {
+        	$this->_database = $this->db;
+        } catch (Exception $e) {
+        	//
+        }
 
         array_unshift($this->before_create, 'protect_attributes');
         array_unshift($this->before_update, 'protect_attributes');
@@ -877,7 +889,7 @@ class MY_Model extends CI_Model
         if ($this->_table == NULL)
         {
 			$this->_table_singular = preg_replace('/(_m|_model)?$/', '', strtolower(get_class($this)));
-            $this->_table = plural($this->_table_singular);        
+            $this->_table = plural($this->_table_singular);
         }
     }
 
