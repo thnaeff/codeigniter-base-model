@@ -172,7 +172,11 @@ class MY_Model extends CI_Model
 
 		$this->_set_where($where);
 
-        $this->trigger('before_get');
+        $ret = $this->trigger('before_get');
+        if ($ret === FALSE) 
+        {
+        	return FALSE;
+        }
 
         $row = $this->_database->get($this->_table)
                         ->{$this->_return_type()}();
@@ -212,7 +216,11 @@ class MY_Model extends CI_Model
      */
     public function get_all()
     {
-        $this->trigger('before_get');
+        $ret = $this->trigger('before_get');
+        if ($ret === FALSE) 
+        {
+        	return FALSE;
+        }
 
         if ($this->soft_delete && $this->_temporary_with_deleted !== TRUE)
         {
@@ -246,6 +254,10 @@ class MY_Model extends CI_Model
         if ($data !== FALSE)
         {
             $data = $this->trigger('before_create', $data);
+            if ($data === FALSE) 
+            {
+            	return FALSE;
+            }
 
             $this->_database->insert($this->_table, $data);
             $insert_id = $this->_database->insert_id();
@@ -281,6 +293,10 @@ class MY_Model extends CI_Model
     public function update($primary_value, $data, $skip_validation = FALSE)
     {
         $data = $this->trigger('before_update', $data);
+        if ($data === FALSE) 
+        {
+        	return FALSE;
+        }
 
         if ($skip_validation === FALSE)
         {
@@ -309,6 +325,10 @@ class MY_Model extends CI_Model
     public function update_many($primary_values, $data, $skip_validation = FALSE)
     {
         $data = $this->trigger('before_update', $data);
+        if ($data === FALSE) 
+        {
+        	return FALSE;
+        }
 
         if ($skip_validation === FALSE)
         {
@@ -340,6 +360,10 @@ class MY_Model extends CI_Model
         $data = array_pop($args);
 
         $data = $this->trigger('before_update', $data);
+        if ($data === FALSE) 
+        {
+        	return FALSE;
+        }
 
         if ($this->validate($data) !== FALSE)
         {
@@ -362,6 +386,10 @@ class MY_Model extends CI_Model
     public function update_all($data)
     {
         $data = $this->trigger('before_update', $data);
+        if ($data === FALSE) {
+        	return FALSE;
+        }
+        
         $result = $this->_database->set($data)
                            ->update($this->_table);
         $this->trigger('after_update', array($data, $result));
@@ -374,7 +402,11 @@ class MY_Model extends CI_Model
      */
     public function delete($id)
     {
-        $this->trigger('before_delete', $id);
+        $id = $this->trigger('before_delete', $id);
+        if ($id === FALSE) 
+        {
+        	return FALSE;
+        }
 
         $this->_database->where($this->primary_key, $id);
 
@@ -400,6 +432,10 @@ class MY_Model extends CI_Model
         $where = func_get_args();
 
 	    $where = $this->trigger('before_delete', $where);
+	    if ($where === FALSE)
+	    {
+	    	return FALSE;
+	    }
 
         $this->_set_where($where);
 
@@ -424,6 +460,10 @@ class MY_Model extends CI_Model
     public function delete_many($primary_values)
     {
         $primary_values = $this->trigger('before_delete', $primary_values);
+        if ($primary_values === FALSE)
+        {
+        	return FALSE;
+        }
 
         $this->_database->where_in($this->primary_key, $primary_values);
 
@@ -794,7 +834,7 @@ class MY_Model extends CI_Model
      * (which looks for an instance variable $this->event_name), an array of
      * parameters to pass through and an optional 'last in interation' boolean
      */
-    public function trigger($event, $data = FALSE, $last = TRUE)
+    public function trigger($event, $data = NULL, $last = TRUE)
     {
         if (isset($this->$event) && is_array($this->$event))
         {
