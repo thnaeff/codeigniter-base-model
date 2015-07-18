@@ -477,16 +477,8 @@ class MY_Model extends CI_Model
 
         foreach ($this->belongs_to as $key => $value)
         {
-            if (is_string($value))
-            {
-                $relationship = $value;
-                $options = array( 'primary_key' => $value . '_id', 'model' => $value . '_model' );
-            }
-            else
-            {
-                $relationship = $key;
-                $options = $value;
-            }
+            $options = $this->_relate_options($key, $value);
+            $relationship = $options['relationship'];
 
             if (in_array($relationship, $this->_with))
             {
@@ -505,17 +497,9 @@ class MY_Model extends CI_Model
 
         foreach ($this->has_many as $key => $value)
         {
-            if (is_string($value))
-            {
-                $relationship = $value;
-                $options = array( 'primary_key' => singular($this->_table) . '_id', 'model' => singular($value) . '_model' );
-            }
-            else
-            {
-                $relationship = $key;
-                $options = $value;
-            }
-
+            $options = $this->_relate_options($key, $value);
+            $relationship = $options['relationship'];
+            
             if (in_array($relationship, $this->_with))
             {
                 $this->load->model($options['model'], $relationship . '_model');
@@ -970,4 +954,28 @@ class MY_Model extends CI_Model
         $method = ($multi) ? 'result' : 'row';
         return $this->_temporary_return_type == 'array' ? $method . '_array' : $method;
     }
+    
+    /**
+     * Smart setting of the relate-options. Only given key-value pairs are used from the belongs_to 
+     * or has_many options array. Default values are set for missing key-value pairs.
+     * 
+     */
+    private function _relate_options($key, $value) {
+    	//Set default options here. Overwrite with belongs_to array later if one exists.
+    	$options = array('primary_key' => singular($this->_table) . '_id');
+    	 
+    	if (is_string($value))
+    	{
+    		$options['relationship'] = $value;
+    		$options = array_merge($options, array('model' => singular($value) . '_model'));
+    	}
+    	else
+    	{
+    		$options['relationship'] = $key;
+    		$options = array_merge($options, array('model' => singular($key) . '_model'));
+    		$options = array_merge($options, $value);
+    	}
+    	
+    }
+    
 }
