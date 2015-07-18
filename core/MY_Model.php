@@ -872,8 +872,7 @@ class MY_Model extends CI_Model
     {
         if ($this->_table == NULL)
         {
-			$this->_table_singular = preg_replace('/(_m|_model)?$/', '', strtolower(get_class($this)));
-            $this->_table = plural($this->_table_singular);
+            $this->_table = plural(preg_replace('/(_m|_model)?$/', '', strtolower(get_class($this))));
         }
     }
 
