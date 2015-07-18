@@ -5,6 +5,19 @@
  *
  * @link http://github.com/jamierumbelow/codeigniter-base-model
  * @copyright Copyright (c) 2012, Jamie Rumbelow <http://jamierumbelow.net>
+ * 
+ * 
+ * 
+ * 
+ * Modifications:
+ * - function _fetch_table fills both the _table_singular and _table
+ * - Primary key is generated from singular table name + '_id'
+ * - Return type is array by default
+ * - belongs_to configuration array generates missing parameters
+ * - belongs_to has a new option merge_array. If set to true, the belongs_to result arrays 
+ *   are merged with the main data array instead of adding an inner array with the relationship 
+ *   as key. This creates a result array like a table join. 
+ * 
  */
 
 class MY_Model extends CI_Model
@@ -19,6 +32,13 @@ class MY_Model extends CI_Model
      * guessed by pluralising the model name.
      */
     protected $_table;
+    
+    /**
+     * The model name in singular. Can be used to access table columns for example 
+     * where the singular form is needed.
+     *
+     */
+    protected $_table_singular;
 
     /**
      * The database connection object. Will be set to the default
@@ -856,7 +876,8 @@ class MY_Model extends CI_Model
     {
         if ($this->_table == NULL)
         {
-            $this->_table = plural(preg_replace('/(_m|_model)?$/', '', strtolower(get_class($this))));
+			$this->_table_singular = preg_replace('/(_m|_model)?$/', '', strtolower(get_class($this)));
+            $this->_table = plural($this->_table_singular);        
         }
     }
 
